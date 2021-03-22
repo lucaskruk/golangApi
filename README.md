@@ -17,9 +17,11 @@ la fuente y contenido del mensaje de auxilio . Para esto, cuentas con tres saté
 permitirán triangular la posición, ¡pero cuidado! el mensaje puede no llegar completo a cada
 satélite debido al campo de asteroides frente a la nave.
 Posición de los satélites actualmente en servicio
-● Kenobi: [-500, -200]
-● Skywalker: [100, -100]
-● Sato: [500, 100]
+- Kenobi: [-500, -200]
+
+- Skywalker: [100, -100]
+
+- Sato: [500, 100]
 
 ### Nivel 1
 
@@ -34,18 +36,30 @@ func GetMessage(messages ...[]string) (msg string)
 ```
 #### Consideraciones:
 
-● La unidad de distancia en los parámetros de GetLocation es la misma que la que se
+- La unidad de distancia en los parámetros de GetLocation es la misma que la que se
 utiliza para indicar la posición de cada satélite.
-● El mensaje recibido en cada satélite se recibe en forma de arreglo de strings.
-● Cuando una palabra del mensaje no pueda ser determinada, se reemplaza por un string
+
+- El mensaje recibido en cada satélite se recibe en forma de arreglo de strings.
+
+- Cuando una palabra del mensaje no pueda ser determinada, se reemplaza por un string
 en blanco en el array.
+
 ○ Ejemplo: [“este”, “es”, “”, “mensaje”]
-● Considerar que existe un desfasaje (a determinar) en el mensaje que se recibe en cada
+
+- Considerar que existe un desfasaje (a determinar) en el mensaje que se recibe en cada
 satélite.
+
 ○ Ejemplo:
+
 ■ Kenobi: [“”, “este”, “es”, “un”, “mensaje”]
+
 ■ Skywalker: [“este”, “”, “un”, “mensaje”]
+
 ■ Sato: [“”, ””, ”es”, ””, ”mensaje”]
+
+##### Desiciones tomadas:
+Para poder encontrar la ubicación, lo primero que realicé fue calcular la intersección entre los tres círculos formados por la posicion de cada satelite mas la distancia a la nave que pide auxilio como radio. La informacíon del comportamiento algebráico la encontre en http://paulbourke.net/geometry/circlesphere/
+Luego si una de las intersecciones aparece en al menos 2 de 3 círculos se considera esa como la posición de la nave.
 
 ### Nivel 2
 
@@ -77,6 +91,7 @@ POST → /topsecret/
 }
 ```
 La respuesta, por otro lado, deberá tener la siguiente forma:
+
 RESPONSE CODE: 200
 ```json
 {
@@ -90,6 +105,7 @@ RESPONSE CODE: 200
 Nota: la respuesta en este ejemplo es meramente ilustrativa y no debe ser considerada como
 caso de prueba para validar la solución propuesta.
 En caso que no se pueda determinar la posición o el mensaje, retorna:
+
 RESPONSE CODE: 404
 
 ### Nivel 3
@@ -108,9 +124,14 @@ la misma estructura del ejemplo del Nivel 2. Caso contrario, deberá responder u
 error indicando que no hay suficiente información.
 
 ### Entregables
+
 ● Código fuente en repositorio privado de GitHub
+
 ● Documentación que indique cómo ejecutar el programa
+
 ● Documentación del proyecto que considere importante
+
 ● URL en donde este hosteado el servicio
+
 ● Contemplar buenas prácticas (tip: imaginar que estas poniendo una aplicación
 productiva)
