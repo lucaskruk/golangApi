@@ -54,7 +54,7 @@ func validaNaves(s []Satelite) (d []float32, m [][]string, count int) {
 	// El orden es: Kenobi, SkyWalker, Sato, segun definido en la configuracion
 	m = make([][]string, 3)
 	d = make([]float32, 3)
-	if len(s) == 3 {
+	if len(s) > 0 {
 		for i := 0; i < 3; i++ {
 			if strings.ToLower(s[i].Name) == strings.ToLower(cfg.RebelShip1.Name) {
 				d[0] = s[i].Distance
