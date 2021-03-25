@@ -127,19 +127,40 @@ El Codigo esta disponible en el repositorio de GITHUB https://github.com/lucaskr
 
 ● Documentación que indique cómo ejecutar el programa
 
-Para poder ejecutar la aplicacion, hay que tener el entorno de GO instalado
+Para poder ejecutar la aplicacion, hay que tener el entorno de GO instalado, para informacion de como obtenerlo, ve a 
+https://golang.org/doc/install
+
+En tu entorno local de go, se necesitan los siguientes paquetes:
+"github.com/gorilla/mux"
+"gopkg.in/yaml.v2"
+En caso de que no te funcione el build, puedes obtenerlos con el comando 
+go get github.com/gorilla/mux
+go get gopkg.in/yaml.v2
+
+Una vez instalado go, abre una consola de comandos en el directorio donde hayas clonado el repositorio, y ejecuta el comando
+go run fuegoquasar.go
+para poder probar la aplicacion. 
+El puerto en el que esta configurado por default, es el 8080, se puede modificar editando el archivo /config/config.yml
 
 ● Documentación del proyecto que considere importante
 
 ##### Desiciones tomadas:
 Para poder encontrar la ubicación, lo primero que realicé fue calcular la intersección entre los tres círculos formados por la posicion de cada satelite mas la distancia a la nave que pide auxilio como radio. La informacíon del comportamiento algebráico la encontre en http://paulbourke.net/geometry/circlesphere/
-Luego si una de las intersecciones aparece en al menos 2 de 3 círculos se considera esa como la posición de la nave.
+
+Por cada interseccion entre círculos puedo obtener uno, dos puntos, o ninguno. Luego de calcular las 3 intersecciones, comparo todos los puntos obtenidos para ver cual es el que se repite en todas ellas. Ese punto es la ubicación del objeto en el plano.
+A tener en cuenta que los resultados de la posicion estan fijados con una precision maxima de 1 cifra decimal.
+
+Los nombres de las naves y sus posiciones iniciales estan configuradas en el archivo config/config.yml, junto con la configuracion del servidor. Para asegurarme de que el calculo sea correcto, valido que los nombres enviados en los request coincidan con los nombres que se configuraron, de lo contrario no podría relacionar la ubicación de cada nave con la distancia.
+Los nombres son case sensitive.
+
+El método Get, que devuelve la informacion de topsecret_split, siempre limpia el array de las naves cargadas, para poder volver a realizar la carga en el caso de que hayan sido cargados incorrectamente los datos.
+
+Es crucial pasar los nombres correctos en la URL del metodo POST /topsecret_split/(nombre) asi como tambien en el json del post del metodo /topsecret/ 
+
+Los metodos de la URL /topsecret_split tanto post como get tienen algunos mensajes orientativos en los response, segun los diferentes escenarios.
 
 ● URL en donde este hosteado el servicio
 
 El servicio esta hosteado en la url https://fluent-burner-308712.rj.r.appspot.com/
-
-● Contemplar buenas prácticas (tip: imaginar que estas poniendo una aplicación
-productiva)
 
 

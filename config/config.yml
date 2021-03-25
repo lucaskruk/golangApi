@@ -1,17 +1,17 @@
 # config.yml
 
 rebelship1:
-  name: "Kenobi"
+  name: "kenobi"
   x: -500
   y: -200
 
 rebelship2:
-  name: "SkyWalker"
+  name: "skywalker"
   x: 100
   y: -100
 
 rebelship3:
-  name: "Sato"
+  name: "sato"
   x: 500
   y: 100
 

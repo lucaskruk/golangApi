@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"fuegoquasar/config"
 	"fuegoquasar/internal"
 	"log"
@@ -40,28 +39,77 @@ type SatelitesRequest struct {
 }
 
 var misNaves []Satelite
+var cfg *config.Config
+var err error
+
+func init() {
+	cfg, err = config.NewConfig(config.CfgPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func validaNaves(s []Satelite) (d []float32, m [][]string, count int) {
+	// Ordena los satelites segun su nombre.
+	// El orden es: Kenobi, SkyWalker, Sato, segun definido en la configuracion
+	m = make([][]string, 3)
+	d = make([]float32, 3)
+	for i := 0; i < 3; i++ {
+		if s[i].Name == cfg.RebelShip1.Name {
+			d[0] = s[i].Distance
+			m[0] = s[i].Message
+			count++
+		}
+		if s[i].Name == cfg.RebelShip2.Name {
+			d[1] = s[i].Distance
+			m[1] = s[i].Message
+			count++
+		}
+		if s[i].Name == cfg.RebelShip3.Name {
+			d[2] = s[i].Distance
+			m[2] = s[i].Message
+			count++
+		}
+	}
+	return
+}
+
+func getResponse(d []float32, m [][]string) (resp BasicResponse, status bool) {
+
+	resp.Position.X, resp.Position.Y = internal.GetLocation(d...)
+	resp.Message = internal.GetMessage(m...)
+
+	if resp.Position.X != -0.09 && resp.Message != "" {
+		status = true
+	}
+	return resp, status
+}
 
 //PostTopSecret - POST - /topsecret
 func PostTopSecret(w http.ResponseWriter, r *http.Request) {
 	var response BasicResponse
 	var request SatelitesRequest
-	// Ordenar los satelites segun su nombre. Validar los nombres de los tres, si me falta uno, devolver error.
+	var status bool = false
+
 	err1 := json.NewDecoder(r.Body).Decode(&request)
+
+	d, m, count := validaNaves(request.Satelites)
 
 	if err1 != nil {
 		log.Fatal(err1)
 	}
-	var status1, status2 bool
+
 	w.Header().Set("Content-Type", "application/json")
-	response.Position.X, response.Position.Y, status1 = internal.GetLocation(request.Satelites[0].Distance, request.Satelites[1].Distance, request.Satelites[2].Distance)
-
-	response.Message, status2 = internal.GetMessage(request.Satelites[0].Message, request.Satelites[1].Message, request.Satelites[2].Message)
-
+	if count == 3 {
+		response, status = getResponse(d, m)
+	} else {
+		log.Println("Las naves no fueron cargadas correctamente. Verifique los nombres")
+	}
 	j, err := json.Marshal(response)
 	if err != nil {
 		log.Fatal(err)
 	}
-	if status1 && status2 {
+	if status {
 		w.WriteHeader(http.StatusOK)
 		w.Write(j)
 	} else {
@@ -89,8 +137,6 @@ func PostTopSecretSplit(w http.ResponseWriter, r *http.Request) {
 	s.Distance = request.Distance
 	s.Message = request.Message
 
-	fmt.Println(s.Name)
-
 	if len(misNaves) < 3 {
 		misNaves = append(misNaves, s)
 		response.Message = "Satelite " + s.Name + " cargado."
@@ -112,23 +158,21 @@ func PostTopSecretSplit(w http.ResponseWriter, r *http.Request) {
 func GetTopSecretSplit(w http.ResponseWriter, r *http.Request) {
 	// Ordenar los satelites segun su nombre. Validar los nombres de los tres, si me falta uno, devolver error.
 	var response BasicResponse
-	var status1, status2 bool
+	var status bool
 	w.Header().Set("Content-Type", "application/json")
-	if len(misNaves) >= 3 {
-		response.Position.X, response.Position.Y, status1 = internal.GetLocation(misNaves[0].Distance, misNaves[1].Distance, misNaves[2].Distance)
-		response.Message, status2 = internal.GetMessage(misNaves[0].Message, misNaves[1].Message, misNaves[2].Message)
-		misNaves = nil
+	d, m, count := validaNaves(misNaves)
+	if count == 3 {
+		response, status = getResponse(d, m)
 	} else {
-		w.WriteHeader(http.StatusOK)
-		status1 = true
-		status2 = true
-		response.Message = "No se cargaron las tres naves, no se puede calcular la posicion"
+		status = true
+		response.Message = "No se cargaron las tres naves, o los nombres no coinciden, no se puede calcular la posicion. Vuelva a cargarlas correctamente"
 	}
+	misNaves = nil
 	j, err := json.Marshal(response)
 	if err != nil {
 		log.Fatal(err)
 	}
-	if status1 && status2 {
+	if status {
 		w.WriteHeader(http.StatusOK)
 		w.Write(j)
 	} else {
@@ -139,10 +183,7 @@ func GetTopSecretSplit(w http.ResponseWriter, r *http.Request) {
 }
 
 func Serve() {
-	cfg, err := config.NewConfig(config.CfgPath)
-	if err != nil {
-		log.Fatal(err)
-	}
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = cfg.Server.Port
