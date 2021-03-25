@@ -57,10 +57,6 @@ satélite.
 
 ■ Sato: [“”, ””, ”es”, ””, ”mensaje”]
 
-##### Desiciones tomadas:
-Para poder encontrar la ubicación, lo primero que realicé fue calcular la intersección entre los tres círculos formados por la posicion de cada satelite mas la distancia a la nave que pide auxilio como radio. La informacíon del comportamiento algebráico la encontre en http://paulbourke.net/geometry/circlesphere/
-Luego si una de las intersecciones aparece en al menos 2 de 3 círculos se considera esa como la posición de la nave.
-
 ### Nivel 2
 
 Crear una API REST, hostear esa API en un cloud computing libre (Google App Engine,
@@ -127,11 +123,23 @@ error indicando que no hay suficiente información.
 
 ● Código fuente en repositorio privado de GitHub
 
+El Codigo esta disponible en el repositorio de GITHUB https://github.com/lucaskruk/fuegoquasar
+
 ● Documentación que indique cómo ejecutar el programa
+
+Para poder ejecutar la aplicacion, hay que tener el entorno de GO instalado
 
 ● Documentación del proyecto que considere importante
 
+##### Desiciones tomadas:
+Para poder encontrar la ubicación, lo primero que realicé fue calcular la intersección entre los tres círculos formados por la posicion de cada satelite mas la distancia a la nave que pide auxilio como radio. La informacíon del comportamiento algebráico la encontre en http://paulbourke.net/geometry/circlesphere/
+Luego si una de las intersecciones aparece en al menos 2 de 3 círculos se considera esa como la posición de la nave.
+
 ● URL en donde este hosteado el servicio
+
+El servicio esta hosteado en la url https://fluent-burner-308712.rj.r.appspot.com/
 
 ● Contemplar buenas prácticas (tip: imaginar que estas poniendo una aplicación
 productiva)
+
+

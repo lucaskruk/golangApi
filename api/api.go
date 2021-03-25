@@ -7,6 +7,7 @@ import (
 	"fuegoquasar/internal"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -48,7 +49,7 @@ func PostTopSecret(w http.ResponseWriter, r *http.Request) {
 	err1 := json.NewDecoder(r.Body).Decode(&request)
 
 	if err1 != nil {
-		panic(err1)
+		log.Fatal(err1)
 	}
 	var status1, status2 bool
 	w.Header().Set("Content-Type", "application/json")
@@ -58,7 +59,7 @@ func PostTopSecret(w http.ResponseWriter, r *http.Request) {
 
 	j, err := json.Marshal(response)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	if status1 && status2 {
 		w.WriteHeader(http.StatusOK)
@@ -77,7 +78,7 @@ func PostTopSecretSplit(w http.ResponseWriter, r *http.Request) {
 	err1 := json.NewDecoder(r.Body).Decode(&request)
 
 	if err1 != nil {
-		panic(err1)
+		log.Fatal(err1)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -99,7 +100,7 @@ func PostTopSecretSplit(w http.ResponseWriter, r *http.Request) {
 
 	j, err := json.Marshal(response)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -125,7 +126,7 @@ func GetTopSecretSplit(w http.ResponseWriter, r *http.Request) {
 	}
 	j, err := json.Marshal(response)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	if status1 && status2 {
 		w.WriteHeader(http.StatusOK)
@@ -142,6 +143,11 @@ func Serve() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = cfg.Server.Port
+		log.Printf("Defaulting to port %s", port)
+	}
 
 	r := mux.NewRouter().StrictSlash(false)
 	r.PathPrefix("/topsecret_split").HandlerFunc(PostTopSecretSplit).Methods("POST")
@@ -149,7 +155,7 @@ func Serve() {
 	r.HandleFunc("/topsecret", PostTopSecret).Methods("POST")
 
 	server := &http.Server{
-		Addr:           cfg.Server.Host + ":" + cfg.Server.Port,
+		Addr:           ":" + port,
 		Handler:        r,
 		ReadTimeout:    cfg.Server.Timeout.Read * time.Second,
 		WriteTimeout:   cfg.Server.Timeout.Write * time.Second,

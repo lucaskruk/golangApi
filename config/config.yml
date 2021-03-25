@@ -17,7 +17,7 @@ rebelship3:
 
 #connection settings  
 server:
-  host: 127.0.0.1
+  host: 
   port: 8080
   timeout:
     server: 30
