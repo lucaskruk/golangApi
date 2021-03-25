@@ -151,7 +151,6 @@ Por cada interseccion entre círculos puedo obtener uno, dos puntos, o ninguno. 
 A tener en cuenta que los resultados de la posicion estan fijados con una precision maxima de 1 cifra decimal.
 
 Los nombres de las naves y sus posiciones iniciales estan configuradas en el archivo config/config.yml, junto con la configuracion del servidor. Para asegurarme de que el calculo sea correcto, valido que los nombres enviados en los request coincidan con los nombres que se configuraron, de lo contrario no podría relacionar la ubicación de cada nave con la distancia.
-Los nombres son case sensitive.
 
 El método Get, que devuelve la informacion de topsecret_split, siempre limpia el array de las naves cargadas, para poder volver a realizar la carga en el caso de que hayan sido cargados incorrectamente los datos.
 
