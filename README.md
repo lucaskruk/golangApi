@@ -241,7 +241,8 @@ Caso OK
         "y": 0
     },
     "message": "Satelite sato cargado."
-} ```
+} 
+```
 en caso de superar el maximo
 ```json
 {
@@ -285,7 +286,8 @@ En el caso que no se haya cargado previamente en el metodo post, los satelites c
         "y": 0
     },
     "message": "No se cargaron los tres satelites, o los nombres no coinciden. Vuelva a cargarlos correctamente"
-}```
+}
+```
 
 ##### Configuraciones
 
