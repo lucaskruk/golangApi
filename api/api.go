@@ -109,7 +109,7 @@ func (a *api) PostTopSecret(w http.ResponseWriter, r *http.Request) {
 		enviaResponse = true
 	} else {
 		d, m, count := validaNaves(request.Satelites)
-		if count == 3 {
+		if count == len(cfg.RebelShips) {
 
 			response, enviaResponse = getResponse(d, m)
 		} else {
@@ -148,7 +148,7 @@ func (a *api) PostTopSecretSplit(w http.ResponseWriter, r *http.Request) {
 		s.Distance = request.Distance
 		s.Message = request.Message
 
-		if len(misNaves) < 3 {
+		if len(misNaves) < len(cfg.RebelShips) {
 			misNaves = append(misNaves, s)
 			response.Message = "Satelite " + s.Name + " cargado."
 		} else {
