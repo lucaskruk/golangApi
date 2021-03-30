@@ -29,11 +29,6 @@ type point struct {
 	Y float32 `json:"y"`
 }
 
-type BasicResponse struct {
-	Position point  `json:"position"`
-	Message  string `json:"message"`
-}
-
 type SatelitesRequest struct {
 	Satelites []Satelite `json:"satelites"`
 }
