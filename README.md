@@ -146,7 +146,9 @@ go run fuegoquasar.go
 para poder probar la aplicacion. 
 
 En el caso de que necesites modificar el puerto, puedes modificar el archivo /config/config.yml
-En ese archivo tambien se encuentra la ubicación de los satelites que usan para obtener la posicion
+En ese archivo tambien se encuentra la ubicación de los satelites que usan para obtener la posicion.
+
+Para invocar los diferentes metodos post y get, una posibilidad es utilizar POSTMAN https://www.postman.com/downloads/ donde se puede colocar la url, el metodo de la invocacion, y el body con los datos de prueba en formato json. 
 
 #### Documentación:
 
@@ -157,7 +159,7 @@ A tener en cuenta que los resultados de la posicion estan fijados con una precis
 
 Para asegurarme de que el calculo sea correcto, valido que los nombres recibidos en el request coincidan con los nombres que se configuraron, de lo contrario no podría relacionar la ubicación de cada satelite con la distancia recibida en el request.
 
-El método que calcula los mensajes, asume que los tres satélites envian el mismo mensaje, con la posibilidad de que uno o varios elementos del array puedan estar vacios. En el caso de que para una de las posiciones del array de mensajes, no haya valor en ninguno de los tres satelites, se considera como mensaje no generado, y se devuelve el response code 404. Tambien determina el desfasaje contando la cantidad de elementos de cada array y seleccionando el mas corto como el mensaje sin "desfasajes" y trunca los primeros elementos de los otros mensajes. 
+El método que calcula los mensajes, asume que los tres satélites envian el mismo mensaje, con la posibilidad de que uno o varios elementos del array puedan estar vacios. En el caso de que para una de las posiciones del array de mensajes, no haya valor en ninguno de los tres satelites, se considera como mensaje no generado, y se devuelve el response code 404. Tambien determina el desfasaje contando la cantidad de elementos de cada array y seleccionando el mas corto como el mensaje sin "desfasajes" y trunca los primeros elementos de los otros mensajes. A tener en cuenta, que en cada una las posiciones combinadas de los arrays recortados, debe existir un array con valor distinto de vacio.  
 
 El método Get, que devuelve la informacion de topsecret_split, siempre limpia el array de las naves cargadas, para poder volver a realizar la carga en el caso de que hayan sido cargados incorrectamente los datos.
 
