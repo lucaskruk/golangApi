@@ -60,13 +60,15 @@ func buscaInterseccion(a *circulo, b *circulo) (p []punto) {
 
 func GetLocation(distances ...float32) (x, y float32) {
 	var result []punto
+	var satelites []*circulo
+	satelites = make([]*circulo, len(distances))
+	for i := 0; i < len(cfg.RebelShips) && i < len(distances); i++ {
+		satelites[i] = newCirculo(float64(cfg.RebelShips[i].X), float64(cfg.RebelShips[i].Y), float64(distances[i]))
+	}
 
-	satelite1 := newCirculo(float64(cfg.RebelShip1.X), float64(cfg.RebelShip1.Y), float64(distances[0]))
-	satelite2 := newCirculo(float64(cfg.RebelShip2.X), float64(cfg.RebelShip2.Y), float64(distances[1]))
-	satelite3 := newCirculo(float64(cfg.RebelShip3.X), float64(cfg.RebelShip3.Y), float64(distances[2]))
-	intersec1 := buscaInterseccion(satelite1, satelite2)
-	intersec2 := buscaInterseccion(satelite2, satelite3)
-	intersec3 := buscaInterseccion(satelite1, satelite3)
+	intersec1 := buscaInterseccion(satelites[0], satelites[1])
+	intersec2 := buscaInterseccion(satelites[1], satelites[2])
+	intersec3 := buscaInterseccion(satelites[0], satelites[2])
 	// una vez obtenidas las intersecciones, busco una que se repita en las tres
 	// de ser asi, esa es la ubicación de la nave.
 	for i := 0; i < len(intersec1); i++ {
@@ -87,7 +89,7 @@ func GetLocation(distances ...float32) (x, y float32) {
 		if result[0].X == result[1].X && result[0].Y == result[1].Y {
 			return float32(result[0].X), float32(result[0].Y)
 		} else {
-			return -0.09, -0.09
+			return -0.09, -0.09 //defini -0.09 como un valor para "no encontrado", asumiendo tambien que todas las respuestas, tienen maximo 1 decimal
 		}
 	} else {
 		return -0.09, -0.09
@@ -109,7 +111,7 @@ func GetMessage(messages ...[]string) (msg string) {
 	for i := 0; i < len(messages); i++ {
 		realstart := len(messages[i]) - minLen // para quitar el desfasaje
 		for j := realstart; j < len(messages[i]); j++ {
-			if messages[i][j] != "" {
+			if messages[i][j] != "" && completemsg[j-realstart] == "" {
 				completemsg[j-realstart] = messages[i][j]
 			}
 		}

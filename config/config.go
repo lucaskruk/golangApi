@@ -11,23 +11,11 @@ import (
 var CfgPath string = "config/config.yml"
 
 type Config struct {
-	RebelShip1 struct {
+	RebelShips []struct {
 		Name string  `yaml:"name"`
 		X    float32 `yaml:"x"`
 		Y    float32 `yaml:"y"`
-	} `yaml:"rebelship1"`
-
-	RebelShip2 struct {
-		Name string  `yaml:"name"`
-		X    float32 `yaml:"x"`
-		Y    float32 `yaml:"y"`
-	} `yaml:"rebelship2"`
-
-	RebelShip3 struct {
-		Name string  `yaml:"name"`
-		X    float32 `yaml:"x"`
-		Y    float32 `yaml:"y"`
-	} `yaml:"rebelship3"`
+	} `yaml:"rebelships"`
 
 	Server struct {
 		// Host is the local machine IP Address to bind the HTTP Server to
@@ -63,7 +51,10 @@ func NewConfig(configPath string) (*Config, error) {
 	// Open config file
 	file, err := os.Open(configPath)
 	if err != nil {
-		return nil, err
+		file, err = os.Open("../" + configPath)
+		if err != nil {
+			return nil, err
+		}
 	}
 	defer file.Close()
 

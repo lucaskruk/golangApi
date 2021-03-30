@@ -1,19 +1,17 @@
 # config.yml
 
-rebelship1:
-  name: "kenobi"
-  x: -500
-  y: -200
+rebelships:
+  -  name: "kenobi"
+     x: -500
+     y: -200
 
-rebelship2:
-  name: "skywalker"
-  x: 100
-  y: -100
+  -  name: "skywalker"
+     x: 100
+     y: -100
 
-rebelship3:
-  name: "sato"
-  x: 500
-  y: 100
+  -  name: "sato"
+     x: 500
+     y: 100
 
 #connection settings  
 server:
