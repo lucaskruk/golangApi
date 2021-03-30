@@ -165,12 +165,14 @@ func (a *api) PostTopSecretSplit(w http.ResponseWriter, r *http.Request) {
 func validaNaves(s []Satelite) (d []float32, m [][]string, count int) {
 	// Ordena los satelites segun su nombre.
 	// El orden es: Kenobi, SkyWalker, Sato, segun definido en la configuracion
+	d = make([]float32, len(cfg.RebelShips))
+	m = make([][]string, len(cfg.RebelShips))
 	if len(s) > 0 {
 		for i := 0; i < len(s); i++ {
 			for j := 0; j < len(cfg.RebelShips); j++ {
 				if strings.ToLower(s[i].Name) == strings.ToLower(cfg.RebelShips[j].Name) {
-					d = append(d, s[i].Distance)
-					m = append(m, s[i].Message)
+					d[j] = s[i].Distance
+					m[j] = s[i].Message
 					count++
 				}
 			}
