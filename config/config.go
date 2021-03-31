@@ -11,46 +11,42 @@ import (
 var CfgPath string = "config/config.yml"
 
 type Config struct {
-	RebelShips []struct {
+	RebelShips []struct { //almacena las posiciones de los satelites y sus nombres
 		Name string  `yaml:"name"`
 		X    float32 `yaml:"x"`
 		Y    float32 `yaml:"y"`
 	} `yaml:"rebelships"`
 
 	Server struct {
-		// Host is the local machine IP Address to bind the HTTP Server to
+		// la ip de la maquina local asociada al server
 		Host string `yaml:"host"`
 
-		// Port is the local machine TCP Port to bind the HTTP Server to
+		// el puerto asociado al server en la maquina local
 		Port    string `yaml:"port"`
 		Timeout struct {
-			// Server is the general server timeout to use
-			// for graceful shutdowns
+			// Timeout general para desconexiones exitosas
 			Server time.Duration `yaml:"server"`
 
-			// Write is the amount of time to wait until an HTTP server
-			// write opperation is cancelled
+			// Tiempo de espera antes de cancelar la op de escritura en un server HTTP
 			Write time.Duration `yaml:"write"`
 
-			// Read is the amount of time to wait until an HTTP server
-			// read operation is cancelled
+			// Tiempo de espera antes de cancelar la op de lectura en un server HTTP
 			Read time.Duration `yaml:"read"`
 
-			// Read is the amount of time to wait
-			// until an IDLE HTTP session is closed
+			// Tiempo de espera para cerrar sesiones inactivas
 			Idle time.Duration `yaml:"idle"`
 		} `yaml:"timeout"`
 	} `yaml:"server"`
 }
 
-// NewConfig returns a new decoded Config struct
+// NewConfig devuelve el struct de configuracion cargado en memoria
 func NewConfig(configPath string) (*Config, error) {
-	// Create config structure
+
 	config := &Config{}
 
-	// Open config file
+	// abro el archivo de configuracion
 	file, err := os.Open(configPath)
-	if err != nil {
+	if err != nil { //arreglo para los tests
 		file, err = os.Open("../" + configPath)
 		if err != nil {
 			return nil, err
@@ -58,10 +54,9 @@ func NewConfig(configPath string) (*Config, error) {
 	}
 	defer file.Close()
 
-	// Init new YAML decode
 	d := yaml.NewDecoder(file)
 
-	// Start YAML decoding from file
+	// decodifico el YAML del archivo
 	if err := d.Decode(&config); err != nil {
 		return nil, err
 	}
@@ -69,19 +64,14 @@ func NewConfig(configPath string) (*Config, error) {
 	return config, nil
 }
 
-// ValidateConfigPath just makes sure, that the path provided is a file,
-// that can be read
+// ValidateConfigPath asegura, que la ruta es un archivo legible
 func ValidateConfigPath(path string) error {
 	s, err := os.Stat(path)
 	if err != nil {
 		return err
 	}
 	if s.IsDir() {
-		return fmt.Errorf("'%s' is a directory, not a normal file", path)
+		return fmt.Errorf("'%s' es un directorio, no un archivo", path)
 	}
 	return nil
-}
-
-func init() {
-
 }

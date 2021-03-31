@@ -124,6 +124,7 @@ func TestPostTopSecretSplit(t *testing.T) {
 }
 
 func TestGetTopSecretSplit(t *testing.T) {
+	t.Log(misNaves)
 	s := New()
 	ts := httptest.NewServer(s.Router())
 	defer ts.Close()
@@ -150,6 +151,7 @@ func TestGetTopSecretSplit(t *testing.T) {
 			t.Fatalf("No se puede parsear el json del response: %v", err1)
 		}
 		t.Log(resp)
+
 	}
 }
 
@@ -176,17 +178,21 @@ func TestPostTopSecret(t *testing.T) {
 		t.Errorf("Expected %d, received %d", http.StatusOK, res.StatusCode)
 		t.Log(satRequest)
 	} else {
+		if res.StatusCode != http.StatusNotFound {
+			b, err2 := ioutil.ReadAll(res.Body)
+			if err2 != nil {
+				t.Fatalf("No se puede leer response: %v", err2)
+			}
+			var resp BasicResponse
+			err1 := json.Unmarshal(b, &resp)
+			if err1 != nil {
+				t.Fatalf("No se puede parsear el json del response: %v", err1)
+			}
+			t.Log(resp)
+		} else {
+			t.Log("No se encontro el punto o el mensaje")
+			t.Log(satRequest)
+		}
 		satRequest.Satelites = nil
-
-		b, err2 := ioutil.ReadAll(res.Body)
-		if err2 != nil {
-			t.Fatalf("No se puede leer response: %v", err2)
-		}
-		var resp BasicResponse
-		err1 := json.Unmarshal(b, &resp)
-		if err1 != nil {
-			t.Fatalf("No se puede parsear el json del response: %v", err1)
-		}
-		t.Log(resp)
 	}
 }

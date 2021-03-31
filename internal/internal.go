@@ -9,7 +9,7 @@ import (
 var cfg *config.Config
 var err error
 
-func init() {
+func init() { //cargo el archivo de configuracion
 	cfg, err = config.NewConfig(config.CfgPath)
 	if err != nil {
 		log.Fatal(err)
@@ -51,7 +51,7 @@ func buscaInterseccion(a *circulo, b *circulo) (p []punto) {
 		x3 := math.Round(x2 + h*(b.Y-a.Y)/Dc)
 		y3 := math.Round(y2 - h*(b.X-a.X)/Dc)
 		p = append(p, punto{x3, y3})
-		x4 := math.Round((x2-h*(b.Y-a.Y)/Dc)*10) / 10
+		x4 := math.Round((x2-h*(b.Y-a.Y)/Dc)*10) / 10 //redondeo a 1 cifra decimal
 		y4 := math.Round((y2+h*(b.X-a.X)/Dc)*10) / 10
 		p = append(p, punto{x4, y4})
 	}
@@ -85,7 +85,7 @@ func GetLocation(distances ...float32) (x, y float32) {
 			}
 		}
 	}
-	if len(result) == 2 {
+	if len(result) == 2 { // el punto coincide en los tres circulos
 		if result[0].X == result[1].X && result[0].Y == result[1].Y {
 			return float32(result[0].X), float32(result[0].Y)
 		} else {
@@ -102,7 +102,6 @@ func GetMessage(messages ...[]string) (msg string) {
 	var completemsg []string
 	minLen = len(messages[0])
 	for i := 0; i < len(messages); i++ {
-
 		if len(messages[i]) < minLen {
 			minLen = len(messages[i])
 		}
@@ -112,12 +111,12 @@ func GetMessage(messages ...[]string) (msg string) {
 		realstart := len(messages[i]) - minLen // para quitar el desfasaje
 		for j := realstart; j < len(messages[i]); j++ {
 			if messages[i][j] != "" && completemsg[j-realstart] == "" {
-				completemsg[j-realstart] = messages[i][j]
+				completemsg[j-realstart] = messages[i][j] //asigno los elementos no vacios
 			}
 		}
 	}
 	for k := 0; k < len(completemsg); k++ {
-		if completemsg[k] != "" {
+		if completemsg[k] != "" { //valido si complete el mensaje
 			space := ""
 			if k > 0 {
 				space = " "

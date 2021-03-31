@@ -71,16 +71,20 @@ func New() Server {
 
 //GetTopSecretSplit - GET - /topsecret_split
 func (a *api) GetTopSecretSplit(w http.ResponseWriter, r *http.Request) {
-	// Ordenar los satelites segun su nombre. Validar los nombres de los tres, si me falta uno, devolver error.
 	var response BasicResponse
 	var encontrado bool
 	w.Header().Set("Content-Type", "application/json")
 	d, m, count := validaNaves(misNaves)
-	if count == 3 {
+	if count == len(cfg.RebelShips) {
 		response, encontrado = getResponse(d, m)
 		if !encontrado {
 			w.WriteHeader(http.StatusNotFound)
-			response.Message = "No se pudo encontrar la ubicacion, o no se pudo descifrar el mensaje. Revise sus parametros e intente nuevamente"
+			if response.Message == "" {
+				response.Message = "No se logro descifrar el mensaje."
+			} else if response.Position.X == -0.09 {
+				response.Message = "No se identifica la ubicacion."
+			}
+			response.Message = response.Message + " Revise sus parametros e intente nuevamente"
 		}
 	} else {
 		w.WriteHeader(http.StatusNotFound)
@@ -99,19 +103,18 @@ func (a *api) GetTopSecretSplit(w http.ResponseWriter, r *http.Request) {
 func (a *api) PostTopSecret(w http.ResponseWriter, r *http.Request) {
 	var response BasicResponse
 	var request SatelitesRequest
-	var enviaResponse bool = false
+	var encontrado bool = false
 	w.Header().Set("Content-Type", "application/json")
 	err1 := json.NewDecoder(r.Body).Decode(&request)
 	if err1 != nil {
 		log.Println(err1)
 		w.WriteHeader(http.StatusBadRequest)
 		response.Message = "Error en el request recibido, por favor verificar"
-		enviaResponse = true
+		encontrado = true
 	} else {
 		d, m, count := validaNaves(request.Satelites)
-		if count == len(cfg.RebelShips) {
-
-			response, enviaResponse = getResponse(d, m)
+		if count == len(cfg.RebelShips) { // confirmo que tengo todas las naves configuradas
+			response, encontrado = getResponse(d, m)
 		} else {
 			w.WriteHeader(http.StatusBadRequest)
 			log.Println("Las naves no fueron cargadas correctamente. Verifique los nombres")
@@ -121,7 +124,7 @@ func (a *api) PostTopSecret(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if enviaResponse {
+	if encontrado {
 		w.Write(j)
 	} else {
 		w.WriteHeader(http.StatusNotFound)
@@ -163,7 +166,7 @@ func (a *api) PostTopSecretSplit(w http.ResponseWriter, r *http.Request) {
 }
 
 func validaNaves(s []Satelite) (d []float32, m [][]string, count int) {
-	// Ordena los satelites segun su nombre.
+	// Ordena los satelites segun su nombre, y devuelve la cantidad
 	// El orden es: Kenobi, SkyWalker, Sato, segun definido en la configuracion
 	d = make([]float32, len(cfg.RebelShips))
 	m = make([][]string, len(cfg.RebelShips))
