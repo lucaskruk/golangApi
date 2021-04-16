@@ -48,8 +48,8 @@ func buscaInterseccion(a *circulo, b *circulo) (p []punto) {
 		h := math.Sqrt(a.radio*a.radio - aa*aa)
 		x2 := a.X + aa*(b.X-a.X)/Dc
 		y2 := a.Y + aa*(b.Y-a.Y)/Dc
-		x3 := math.Round(x2 + h*(b.Y-a.Y)/Dc)
-		y3 := math.Round(y2 - h*(b.X-a.X)/Dc)
+		x3 := math.Round((x2+h*(b.Y-a.Y)/Dc)*10) / 10
+		y3 := math.Round((y2-h*(b.X-a.X)/Dc)*10) / 10
 		p = append(p, punto{x3, y3})
 		x4 := math.Round((x2-h*(b.Y-a.Y)/Dc)*10) / 10 //redondeo a 1 cifra decimal
 		y4 := math.Round((y2+h*(b.X-a.X)/Dc)*10) / 10
