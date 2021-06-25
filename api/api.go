@@ -2,8 +2,8 @@ package api
 
 import (
 	"encoding/json"
-	"fuegoquasar/config"
-	"fuegoquasar/internal"
+	"locator/config"
+	"locator/internal"
 	"log"
 	"net/http"
 	"os"
@@ -16,13 +16,13 @@ import (
 type api struct {
 	router http.Handler
 }
-type Satelite struct {
+type Ship struct {
 	Name     string   `json:"name"`
 	Distance float32  `json:"distance"`
 	Message  []string `json:"message"`
 }
 
-type SateliteSplit struct {
+type ShipSplit struct {
 	Distance float32  `json:"distance"`
 	Message  []string `json:"message"`
 }
@@ -35,17 +35,17 @@ type BasicResponse struct {
 	Message string `json:"message"`
 }
 
-type SatelitesRequest struct {
-	Satelites []Satelite `json:"satelites"`
+type ShipsRequest struct {
+	Ships []Ship `json:"ships"`
 }
 type Server interface {
 	Router() http.Handler
-	PostTopSecret(w http.ResponseWriter, r *http.Request)
-	GetTopSecretSplit(w http.ResponseWriter, r *http.Request)
-	PostTopSecretSplit(w http.ResponseWriter, r *http.Request)
+	PostHelpMe(w http.ResponseWriter, r *http.Request)
+	GetHelpMeSplit(w http.ResponseWriter, r *http.Request)
+	PostHelpMeSplit(w http.ResponseWriter, r *http.Request)
 }
 
-var misNaves []Satelite
+var myShips []Ship
 var cfg *config.Config
 var err error
 
@@ -62,36 +62,35 @@ func (a *api) Router() http.Handler {
 func New() Server {
 	a := &api{}
 	r := mux.NewRouter()
-	r.PathPrefix("/topsecret_split").HandlerFunc(a.PostTopSecretSplit).Methods(http.MethodPost)
-	r.PathPrefix("/topsecret_split").HandlerFunc(a.GetTopSecretSplit).Methods(http.MethodGet)
-	r.HandleFunc("/topsecret", a.PostTopSecret).Methods(http.MethodPost)
+	r.PathPrefix("/helpme_split").HandlerFunc(a.PostHelpMeSplit).Methods(http.MethodPost)
+	r.PathPrefix("/helpme_split").HandlerFunc(a.GetHelpMeSplit).Methods(http.MethodGet)
+	r.HandleFunc("/helpme", a.PostHelpMe).Methods(http.MethodPost)
 	a.router = r
 	return a
 }
 
-//GetTopSecretSplit - GET - /topsecret_split
-func (a *api) GetTopSecretSplit(w http.ResponseWriter, r *http.Request) {
+//GetHelpMeSplit - GET - /helpme_split
+func (a *api) GetHelpMeSplit(w http.ResponseWriter, r *http.Request) {
 	var response BasicResponse
 	var encontrado bool
 	w.Header().Set("Content-Type", "application/json")
-	d, m, count := validaNaves(misNaves)
-	if count == len(cfg.RebelShips) {
+	d, m, count := checkShips(myShips)
+	if count == len(cfg.Ships) {
 		response, encontrado = getResponse(d, m)
 		if !encontrado {
 			w.WriteHeader(http.StatusNotFound)
 			if response.Message == "" {
-				response.Message = "No se logro descifrar el mensaje."
+				response.Message = "Message can't be recovered."
 			} else if response.Position.X == -0.09 {
-				response.Message = "No se identifica la ubicacion."
+				response.Message = "Location can't be identified."
 			}
-			response.Message = response.Message + " Revise sus parametros e intente nuevamente"
+			response.Message = response.Message + " Check your parameters and try again."
 		}
 	} else {
-		w.WriteHeader(http.StatusNotFound)
-		response.Message = "No se cargaron los tres satelites, o los nombres no coinciden. Vuelva a cargarlos correctamente"
+		response.Message = "Please check that all configured ships were loaded before trying to get position. Loaded ships cleared. Please try again"
 	}
 
-	misNaves = nil
+	myShips = nil
 	j, err := json.Marshal(response)
 	if err != nil {
 		log.Fatal(err)
@@ -99,25 +98,24 @@ func (a *api) GetTopSecretSplit(w http.ResponseWriter, r *http.Request) {
 	w.Write(j)
 }
 
-//PostTopSecret - POST - /topsecret
-func (a *api) PostTopSecret(w http.ResponseWriter, r *http.Request) {
+//PostHelpMe - POST - /helpme
+func (a *api) PostHelpMe(w http.ResponseWriter, r *http.Request) {
 	var response BasicResponse
-	var request SatelitesRequest
+	var request ShipsRequest
 	var encontrado bool = false
 	w.Header().Set("Content-Type", "application/json")
 	err1 := json.NewDecoder(r.Body).Decode(&request)
 	if err1 != nil {
 		log.Println(err1)
 		w.WriteHeader(http.StatusBadRequest)
-		response.Message = "Error en el request recibido, por favor verificar"
+		response.Message = "Bad Request Syntax, please check"
 		encontrado = true
 	} else {
-		d, m, count := validaNaves(request.Satelites)
-		if count == len(cfg.RebelShips) { // confirmo que tengo todas las naves configuradas
+		d, m, count := checkShips(request.Ships)
+		if count == len(cfg.Ships) {
 			response, encontrado = getResponse(d, m)
 		} else {
-			w.WriteHeader(http.StatusBadRequest)
-			log.Println("Las naves no fueron cargadas correctamente. Verifique los nombres")
+			response.Message = "Ship name not found in configured names."
 		}
 	}
 	j, err := json.Marshal(response)
@@ -128,15 +126,21 @@ func (a *api) PostTopSecret(w http.ResponseWriter, r *http.Request) {
 		w.Write(j)
 	} else {
 		w.WriteHeader(http.StatusNotFound)
+		if response.Message == "" {
+			response.Message = "Message can't be recovered."
+		} else if response.Position.X == -0.09 {
+			response.Message = "Location can't be identified."
+		}
+		response.Message = response.Message + " Check your parameters and try again."
 	}
 }
 
-//PostTopSecretSplit - POST - /topsecret_split
-func (a *api) PostTopSecretSplit(w http.ResponseWriter, r *http.Request) {
+//PostHelpMeSplit - POST - /helpme_split
+func (a *api) PostHelpMeSplit(w http.ResponseWriter, r *http.Request) {
 	var response BasicResponse
-	var request SateliteSplit
+	var request ShipSplit
 	var route []string
-	var s Satelite
+	var s Ship
 
 	w.Header().Set("Content-Type", "application/json")
 	err1 := json.NewDecoder(r.Body).Decode(&request)
@@ -144,18 +148,18 @@ func (a *api) PostTopSecretSplit(w http.ResponseWriter, r *http.Request) {
 	if err1 != nil {
 		log.Println(err1)
 		w.WriteHeader(http.StatusBadRequest)
-		response.Message = "Error en el request recibido, por favor verificar"
+		response.Message = "Wrong request syntax, please check"
 	} else {
 		route = strings.Split(r.URL.Path, "/")
 		s.Name = route[len(route)-1]
 		s.Distance = request.Distance
 		s.Message = request.Message
 
-		if len(misNaves) < len(cfg.RebelShips) {
-			misNaves = append(misNaves, s)
-			response.Message = "Satelite " + s.Name + " cargado."
+		if len(myShips) < len(cfg.Ships) {
+			myShips = append(myShips, s)
+			response.Message = "Ship " + s.Name + " loaded."
 		} else {
-			response.Message = "Todas las naves fueron cargadas. Ejecute un get para obtener la posicion y limpiar el array."
+			response.Message = "All ships loaded. Run get methot to obtain position and clean array."
 		}
 	}
 	j, err := json.Marshal(response)
@@ -165,15 +169,13 @@ func (a *api) PostTopSecretSplit(w http.ResponseWriter, r *http.Request) {
 	w.Write(j)
 }
 
-func validaNaves(s []Satelite) (d []float32, m [][]string, count int) {
-	// Ordena los satelites segun su nombre, y devuelve la cantidad
-	// El orden es: Kenobi, SkyWalker, Sato, segun definido en la configuracion
-	d = make([]float32, len(cfg.RebelShips))
-	m = make([][]string, len(cfg.RebelShips))
+func checkShips(s []Ship) (d []float32, m [][]string, count int) {
+	d = make([]float32, len(cfg.Ships))
+	m = make([][]string, len(cfg.Ships))
 	if len(s) > 0 {
 		for i := 0; i < len(s); i++ {
-			for j := 0; j < len(cfg.RebelShips); j++ {
-				if strings.ToLower(s[i].Name) == strings.ToLower(cfg.RebelShips[j].Name) {
+			for j := 0; j < len(cfg.Ships); j++ {
+				if strings.EqualFold(s[i].Name, cfg.Ships[j].Name) {
 					d[j] = s[i].Distance
 					m[j] = s[i].Message
 					count++
@@ -214,7 +216,7 @@ func Serve() {
 		MaxHeaderBytes: 1 << 20,
 	}
 
-	log.Println("Escuchando...")
+	log.Println("Listening...")
 	server.ListenAndServe()
 
 }

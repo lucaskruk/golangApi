@@ -13,7 +13,6 @@ import (
 )
 
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-var s Server
 
 func init() {
 	rand.Seed(time.Now().UnixNano())
@@ -49,29 +48,29 @@ func getRandomPoint() (x, y float32) {
 	return
 }
 
-func makeSatelitesRequest() (s []Satelite) {
+func makeShipsRequest() (ships []Ship) {
 	x, y := getRandomPoint()
-	for i := 0; i < len(cfg.RebelShips); i++ {
-		var sat Satelite
-		sat.Message = getRandomMessage()
-		sat.Distance = getDistance(cfg.RebelShips[i].X, cfg.RebelShips[i].Y, x, y)
-		sat.Name = cfg.RebelShips[i].Name
-		s = append(s, sat)
+	for i := 0; i < len(cfg.Ships); i++ {
+		var ship Ship
+		ship.Message = getRandomMessage()
+		ship.Distance = getDistance(cfg.Ships[i].X, cfg.Ships[i].Y, x, y)
+		ship.Name = cfg.Ships[i].Name
+		ships = append(ships, ship)
 
 	}
-	return s
+	return ships
 }
 
-func makeSatSplitRequests() (s []SateliteSplit, names []string) {
+func makeShipSplitRequests() (ships []ShipSplit, names []string) {
 	x, y := getRandomPoint()
-	for i := 0; i < len(cfg.RebelShips); i++ {
-		var sat SateliteSplit
-		sat.Message = getRandomMessage()
-		sat.Distance = getDistance(cfg.RebelShips[i].X, cfg.RebelShips[i].Y, x, y)
-		s = append(s, sat)
-		names = append(names, cfg.RebelShips[i].Name)
+	for i := 0; i < len(cfg.Ships); i++ {
+		var ship ShipSplit
+		ship.Message = getRandomMessage()
+		ship.Distance = getDistance(cfg.Ships[i].X, cfg.Ships[i].Y, x, y)
+		ships = append(ships, ship)
+		names = append(names, cfg.Ships[i].Name)
 	}
-	return s, names
+	return ships, names
 }
 
 func getDistance(a, b, c, d float32) (distance float32) {
@@ -82,23 +81,23 @@ func getDistance(a, b, c, d float32) (distance float32) {
 	return distance
 }
 
-func TestPostTopSecretSplit(t *testing.T) {
-	s := New()
-	ts := httptest.NewServer(s.Router())
+func TestPostHelpMeSplit(t *testing.T) {
+	server := New()
+	ts := httptest.NewServer(server.Router())
 	defer ts.Close()
 
-	sats, names := makeSatSplitRequests()
-	for i := 0; i < len(sats); i++ {
-		bdy, err1 := json.Marshal(sats[i])
+	ships, names := makeShipSplitRequests()
+	for i := 0; i < len(ships); i++ {
+		bdy, err1 := json.Marshal(ships[i])
 		if err1 != nil {
-			t.Errorf("No armo el body.")
+			t.Errorf("Can't create body.")
 		}
-		req, err := http.NewRequest("POST", "/topsecret_split/"+names[i], bytes.NewBuffer(bdy))
+		req, err := http.NewRequest("POST", "/helpme_split/"+names[i], bytes.NewBuffer(bdy))
 		if err != nil {
-			t.Errorf("No pude armar request %s", err.Error())
+			t.Errorf("Can't create request %s", err.Error())
 		}
 		rec := httptest.NewRecorder()
-		s.PostTopSecretSplit(rec, req)
+		server.PostHelpMeSplit(rec, req)
 		res := rec.Result()
 		defer res.Body.Close()
 		if err != nil {
@@ -106,16 +105,16 @@ func TestPostTopSecretSplit(t *testing.T) {
 		}
 		if res.StatusCode != http.StatusOK && res.StatusCode != http.StatusNotFound {
 			t.Errorf("Expected %d, received %d", http.StatusOK, res.StatusCode)
-			t.Log(sats[i])
+			t.Log(ships[i])
 		} else {
 			b, err2 := ioutil.ReadAll(res.Body)
 			if err2 != nil {
-				t.Fatalf("No se puede leer response: %v", err2)
+				t.Fatalf("Response cannot be read: %v", err2)
 			}
 			var resp BasicResponse
 			err1 := json.Unmarshal(b, &resp)
 			if err1 != nil {
-				t.Fatalf("No se puede parsear el json del response: %v", err1)
+				t.Fatalf("Response Json can't be parsed: %v", err1)
 			}
 			t.Log(resp)
 		}
@@ -123,17 +122,17 @@ func TestPostTopSecretSplit(t *testing.T) {
 
 }
 
-func TestGetTopSecretSplit(t *testing.T) {
-	t.Log(misNaves)
-	s := New()
-	ts := httptest.NewServer(s.Router())
-	defer ts.Close()
-	req, err := http.NewRequest("GET", "/topsecret_split", nil)
+func TestGetHelpMeSplit(t *testing.T) {
+	t.Log(myShips)
+	server := New()
+	testserver := httptest.NewServer(server.Router())
+	defer testserver.Close()
+	req, err := http.NewRequest("GET", "/helpme_split", nil)
 	if err != nil {
-		t.Errorf("No pude armar request %s", err.Error())
+		t.Errorf("Can't create request %s", err.Error())
 	}
 	rec := httptest.NewRecorder()
-	s.GetTopSecretSplit(rec, req)
+	server.GetHelpMeSplit(rec, req)
 
 	res := rec.Result()
 	defer res.Body.Close()
@@ -143,32 +142,32 @@ func TestGetTopSecretSplit(t *testing.T) {
 	} else {
 		b, err2 := ioutil.ReadAll(res.Body)
 		if err2 != nil {
-			t.Fatalf("No se puede leer response: %v", err2)
+			t.Fatalf("Response can't be read: %v", err2)
 		}
 		var resp BasicResponse
 		err1 := json.Unmarshal(b, &resp)
 		if err1 != nil {
-			t.Fatalf("No se puede parsear el json del response: %v", err1)
+			t.Fatalf("Response Json can't be parsed: %v", err1)
 		}
 		t.Log(resp)
 
 	}
 }
 
-func TestPostTopSecret(t *testing.T) {
-	s := New()
-	ts := httptest.NewServer(s.Router())
-	defer ts.Close()
-	var satRequest SatelitesRequest
+func TestPostHelpMe(t *testing.T) {
+	server := New()
+	testserver := httptest.NewServer(server.Router())
+	defer testserver.Close()
+	var shipsRequest ShipsRequest
 
-	satRequest.Satelites = makeSatelitesRequest()
-	bdy, err1 := json.Marshal(satRequest)
+	shipsRequest.Ships = makeShipsRequest()
+	bdy, err1 := json.Marshal(shipsRequest)
 	if err1 != nil {
-		t.Errorf("No se armo correctamente el request.")
+		t.Errorf("Can't create request.")
 	}
-	req, err := http.NewRequest("POST", "/topsecret", bytes.NewBuffer(bdy))
+	req, err := http.NewRequest("POST", "/helpme", bytes.NewBuffer(bdy))
 	rec := httptest.NewRecorder()
-	s.PostTopSecret(rec, req)
+	server.PostHelpMe(rec, req)
 	res := rec.Result()
 	defer res.Body.Close()
 	if err != nil {
@@ -176,23 +175,23 @@ func TestPostTopSecret(t *testing.T) {
 	}
 	if res.StatusCode != http.StatusOK && res.StatusCode != http.StatusNotFound {
 		t.Errorf("Expected %d, received %d", http.StatusOK, res.StatusCode)
-		t.Log(satRequest)
+		t.Log(shipsRequest)
 	} else {
 		if res.StatusCode != http.StatusNotFound {
 			b, err2 := ioutil.ReadAll(res.Body)
 			if err2 != nil {
-				t.Fatalf("No se puede leer response: %v", err2)
+				t.Fatalf("Response can't be read: %v", err2)
 			}
 			var resp BasicResponse
 			err1 := json.Unmarshal(b, &resp)
 			if err1 != nil {
-				t.Fatalf("No se puede parsear el json del response: %v", err1)
+				t.Fatalf("Response Json can't be parsed: %v", err1)
 			}
 			t.Log(resp)
 		} else {
-			t.Log("No se encontro el punto o el mensaje")
-			t.Log(satRequest)
+			t.Log("Failed to get message and/or position")
+			t.Log(shipsRequest)
 		}
-		satRequest.Satelites = nil
+		shipsRequest.Ships = nil
 	}
 }

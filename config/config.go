@@ -11,11 +11,11 @@ import (
 var CfgPath string = "config/config.yml"
 
 type Config struct {
-	RebelShips []struct { //almacena las posiciones de los satelites y sus nombres
+	Ships []struct { //almacena las posiciones de los satelites y sus nombres
 		Name string  `yaml:"name"`
 		X    float32 `yaml:"x"`
 		Y    float32 `yaml:"y"`
-	} `yaml:"rebelships"`
+	} `yaml:"ships"`
 
 	Server struct {
 		// la ip de la maquina local asociada al server

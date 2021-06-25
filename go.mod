@@ -1,4 +1,4 @@
-module fuegoquasar
+module locator
 
 go 1.16
 
