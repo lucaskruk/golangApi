@@ -45,63 +45,15 @@ satélite.
 
 ■ BarcoTres: [“”, ””, ”es”, ””, ”mensaje”]
 
-Se expone el endpoint /helpme/ en donde se pueda obtener la ubicación de
-la nave y el mensaje que emite.
-El servicio recibirá la información de la nave a través de un HTTP POST con un payload con el
-siguiente formato:
-POST → /helpme/
-```json
-{
-"ships": [
-{
-“name”: "BarcoUno",
-“distance”: 100.0,
-“message”: ["este", "", "", "mensaje", ""]
-},
-{
-“name”: "BarcoDos",
-“distance”: 115.5
-“message”: ["", "es", "", "", "secreto"]
-},
-{
-“name”: "BarcoTres",
-“distance”: 142.7
-“message”: ["este", "", "un", "", ""]
-}
-]
-}
-```
-La respuesta, por otro lado, deberá tener la siguiente forma:
-
-RESPONSE CODE: 200
-```json
-{
-"position": {
-"x": -100.0,
-"y": 75.5
-},
-"message": "este es un mensaje secreto"
-}
-```
-En caso que no se pueda determinar la posición o el mensaje, retorna:
-
-RESPONSE CODE: 404
-
+Se expone el endpoint /helpme/ en donde se puede obtener la ubicación de
+la nave y el mensaje que emite. En el caso de no poder determinar la posicion o el mensaje, devuelve 404
 
 Tambien se expone el endpoint /helpme_split/ , respetando la misma firma que antes. Por ejemplo:
-POST → /helpme_split/{ship_name}
-```json
-{
-"distance": 100.0,
-"message": ["este", "", "", "mensaje", ""]
-}
-```
 Este endpoint acepta POST y GET. En el GET la
 respuesta indica la posición y el mensaje en caso que sea posible determinarlo y tiene
 la misma estructura del response del endpoint /helpme/ 
 De lo contrario, responde un mensaje de
 error indicando que no hay suficiente información.
-
 
 
 Para poder ejecutar la aplicacion, hay que tener el entorno de GO instalado, para informacion de como obtenerlo, ve a 
@@ -161,17 +113,17 @@ Ship: Es un struct con los siguientes campos:
 {
 "ships":[
 {
-"name": "Kenobi",
+"name": "BarcoUno",
 "distance": 761.577,
 "message": ["","", "este", "es", "o", ""]
 },
 {
-"name": "SkyWalker",
+"name": "BarcoDos",
 "distance": 223.607,
 "message": ["", "es", "", "mensaje"]
 },
 {
-"name": "Sato",
+"name": "BarcoTres",
 "distance": 300,
 "message": ["", "", "es", "o", ""]
 }
@@ -216,7 +168,7 @@ Caso OK
         "x": 0,
         "y": 0
     },
-    "message": "Barco BarcoUno cargado."
+    "message": "Ship BarcoUno loaded."
 } 
 ```
 en caso de superar el maximo
@@ -226,7 +178,7 @@ en caso de superar el maximo
         "x": 0,
         "y": 0
     },
-    "message": "Todas las naves fueron cargadas. Ejecute un get para obtener la posicion y limpiar el array."
+    "message": "All ships loaded. Run get methot to obtain position and clean array."
 }
 ```
 
@@ -251,7 +203,7 @@ En caso de no encontrar la ubicacion, o no colocar los nombres configurados, dev
         "x": -0.09,
         "y": -0.09
     },
-    "message": "No se pudo encontrar la ubicacion, o no se pudo descifrar el mensaje. Revise sus parametros e intente nuevamente"
+    "message": "Message can't be recovered. Location can't be identified. Check your parameters and try again."
 }
 ```
 En el caso que no se haya cargado previamente en el metodo post, los satelites configurados, devuelve:
