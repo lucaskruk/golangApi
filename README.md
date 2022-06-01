@@ -1,11 +1,11 @@
 # locator
 
-## Api Localizadora
+## Locator API
 
-Locator es un programa en Golang que retorna
-la fuente y contenido de un mensaje de auxilio de un barco perdido. Lo hace
-triangulando la posición, de tres barcos contra el que esta pidiendo ayuda.Tambien completa el mensaje recibido entre los tres barcos de rescate.
-Posición de los barcos de rescate
+Locator is a Golang API that returns 
+the position and content from the source of a SOS message in a two dimensional surface. it does it by triangling its position, from three listening ships who receive the message. It also completes the content of the message between all the listeners.
+The position of the listener ships is defined below:
+
 - BarcoUno: [-500, -200]
 
 - BarcoDos: [100, -100]
@@ -13,31 +13,28 @@ Posición de los barcos de rescate
 - BarcoTres: [500, 100]
 
 
-El programa tiene las siguientes firmas:
+The application has the following functions:
 ```golang
-// input: distancia al emisor tal cual se recibe en cada barco
-// output: las coordenadas ‘x’ e ‘y’ del emisor del mensaje
+// input: distance from listening ship to missing ship
+// output: X and Y coordinates of missing ship
 func GetLocation(distances ...float32) (x, y float32)
-// input: el mensaje tal cual es recibido en cada barco
-// output: el mensaje tal cual lo genera el emisor del mensaje
+// input: message as received by each listener ship
+// output: complete SOS message
 func GetMessage(messages ...[]string) (msg string)
 ```
-#### Consideraciones:
+#### Considerations:
 
-- La unidad de distancia en los parámetros de GetLocation es la misma que la que se
-utiliza para indicar la posición de cada barco rescatista.
+- All parameters from GetLocation function have the same measure unit, and that is the same used at X and Y axis to determine position.
 
-- El mensaje recibido en cada barco se recibe en forma de arreglo de strings.
+- The SOS message is received in an array of strings.
 
-- Cuando una palabra del mensaje no pueda ser determinada, se reemplaza por un string
-en blanco en el array.
+- When a word in the SOS message cannot be determined is replaced by an empty string in message array.
 
-○ Ejemplo: [“este”, “es”, “”, “mensaje”]
+○ Example: [“este”, “es”, “”, “mensaje”]
 
-- Considerar que existe un desfasaje (a determinar) en el mensaje que se recibe en cada
-satélite.
+- Consider that a time displacement could occur in some of the messages, so the first elements could appear as empty, and the length of the array be longer than the original message.
 
-○ Ejemplo:
+○ Example:
 
 ■ BarcoUno: [“”, “este”, “es”, “un”, “mensaje”]
 
@@ -45,34 +42,28 @@ satélite.
 
 ■ BarcoTres: [“”, ””, ”es”, ””, ”mensaje”]
 
-Se expone el endpoint /helpme/ en donde se puede obtener la ubicación de
-la nave y el mensaje que emite. En el caso de no poder determinar la posicion o el mensaje, devuelve 404
+A /helpme/ endpoint is available to obtain missing ship location and message. If it is not able to determine position or message, it returns 404
 
-Tambien se expone el endpoint /helpme_split/ , respetando la misma firma que antes. Por ejemplo:
-Este endpoint acepta POST y GET. En el GET la
-respuesta indica la posición y el mensaje en caso que sea posible determinarlo y tiene
-la misma estructura del response del endpoint /helpme/ 
-De lo contrario, responde un mensaje de
-error indicando que no hay suficiente información.
+Also /helpme_split/ endpoint is available, This endpoint can receive POST and GET requests. 
+With POST request we can send each listener ship message and distance.
+With GET request we will get the position and message with the same format as /helpme/ endpoint, and the same 404 behavior. If not all three listener ships where sent before issuing a GET request, it will response an error message telling that there isn't enough information to proceed. 
 
-
-Para poder ejecutar la aplicacion, hay que tener el entorno de GO instalado, para informacion de como obtenerlo, ve a 
+In order to run the application, we need to have our GO environment setup properly, to know how to install please go to: 
 https://golang.org/doc/install
 
-En tu entorno local de go, se necesitan los siguientes paquetes:
+You will need to install the following packages:
 "github.com/gorilla/mux"
 "gopkg.in/yaml.v2"
-Cuando se ejecuta go build se descargan automaticamente, pero tambien puedes obtenerlos con los comandos 
+They're automatically downloaded during go build command, but also can be manually downloaded with the following commands:
 go get github.com/gorilla/mux
 go get gopkg.in/yaml.v2
 
 
-Una vez instalado go, abre una consola de comandos en el directorio donde hayas clonado el repositorio, y ejecuta el comando
+To start the API, execute the following command:
 go run locator.go
-para poder probar la aplicacion. 
 
-En el caso de que necesites modificar el puerto, puedes modificar el archivo /config/config.yml
-En ese archivo tambien se encuentra la ubicación de los satelites que usan para obtener la posicion.
+
+You can modify /config/config.yml to change application port or listening ships location.
 
 Para invocar los diferentes metodos post y get, una posibilidad es utilizar POSTMAN https://www.postman.com/downloads/ donde se puede colocar la url, el metodo de la invocacion, y el body con los datos de prueba en formato json. 
 
